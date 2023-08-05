@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  release-on-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -18,7 +18,26 @@ jobs:
     - uses: actions/setup-go@v4
       with:
         go-version: '1.18'
-    - run: ./build.sh
+    - run: ./build-on-linux.sh
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: bin/csv2sqlite3-*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+
+  release-on-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-go@v4
+      with:
+        go-version: '1.18'
+    - run: ./build-on-macos.sh
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
