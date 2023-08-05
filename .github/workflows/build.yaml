@@ -9,21 +9,6 @@ on:
   pull_request: {}
 
 jobs:
-  build-on-linux:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 1
-    - uses: actions/setup-go@v4
-      with:
-        go-version: '1.18'
-    - run: ./build-on-linux.sh
-    - uses: actions/upload-artifact@v3
-      with:
-        name: binaries
-        path: bin/csv2sqlite3-*
-        retention-days: 3
   build-on-macos:
     runs-on: macos-latest
     steps:
