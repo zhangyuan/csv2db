@@ -14,14 +14,24 @@ import (
 	"github.com/samber/lo"
 )
 
-var opts struct {
+type Options struct {
 	Filename       string `short:"f" long:"filename" description:"CSV filename" required:"true"`
 	TableName      string `short:"t" long:"table" description:"Table name" required:"false"`
 	TrimWhiteSpace string `long:"trim" description:"Trim leading and trailing space" choice:"true" choice:"false" default:"true"`
+	DataTypes      string `long:"data_types" description:"Data types of the fields" required:"false"`
+	ChunkSize      int    `long:"chunk_size" description:"Chunk size" default:"10"`
+}
+
+type Config struct {
+	DefaultDataType string
+	TrimWhiteSpace  bool
+	ChunkSize       int
 }
 
 func main() {
+	var opts = Options{}
 	_, err := flags.ParseArgs(&opts, os.Args)
+
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -35,13 +45,18 @@ func main() {
 		tableName = opts.TableName
 	}
 
-	trimWhiteSpace := opts.TrimWhiteSpace == "true"
-	if err := invoke(tableName, opts.Filename, trimWhiteSpace); err != nil {
+	config := Config{
+		DefaultDataType: opts.DataTypes,
+		TrimWhiteSpace:  strings.ToLower(opts.TrimWhiteSpace) == "true",
+		ChunkSize:       opts.ChunkSize,
+	}
+
+	if err := invoke(tableName, opts.Filename, config); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func invoke(tableName string, filename string, trimWhilteSpace bool) error {
+func invoke(tableName string, filename string, config Config) error {
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -78,10 +93,18 @@ func invoke(tableName string, filename string, trimWhilteSpace bool) error {
 
 	for idx, column := range headers {
 		column := strings.TrimSpace(column)
-		if len(headers) != idx+1 {
-			create_table_statments += "\n  " + column + " varchar(256),"
+		var dataType string
+
+		if len(strings.TrimSpace(config.DefaultDataType)) > 0 {
+			dataType = " " + config.DefaultDataType
 		} else {
-			create_table_statments += "\n  " + column + " varchar(256)"
+			dataType = ""
+		}
+
+		if len(headers) != idx+1 {
+			create_table_statments += fmt.Sprintf("\n %s%s,", column, dataType)
+		} else {
+			create_table_statments += fmt.Sprintf("\n %s%s", column, dataType)
 		}
 	}
 
@@ -94,14 +117,14 @@ func invoke(tableName string, filename string, trimWhilteSpace bool) error {
 	}
 
 	allRows := data[1:]
-	for _, chunk := range lo.Chunk(allRows, 2) {
+	for _, chunk := range lo.Chunk(allRows, config.ChunkSize) {
 		statement := "INSERT INTO " + tableName + " ("
 		statement += strings.Join(headers, ", ")
 		statement += ") VALUES "
 
 		rows := lo.Map(chunk, func(row []string, index int) string {
 			values := lo.Map(row, func(value string, _ int) string {
-				if trimWhilteSpace {
+				if config.TrimWhiteSpace {
 					value = strings.TrimSpace(value)
 				}
 				return "'" + EscapeStringValue(value) + "'"

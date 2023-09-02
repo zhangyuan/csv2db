@@ -1,5 +1,5 @@
 /*.csv
 *.db
-csv2sqlite3
+csv2db
 .vscode/
 bin/

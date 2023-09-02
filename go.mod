@@ -1,4 +1,4 @@
-module csv2sqlite3
+module csv2db
 
 go 1.18
 
@@ -10,6 +10,6 @@ require (
 )
 
 require (
-	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
-	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
+	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
+	golang.org/x/sys v0.11.0 // indirect
 )
