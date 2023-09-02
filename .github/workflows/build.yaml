@@ -22,5 +22,5 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: bin/csv2sqlite3-*
+        path: bin/csv2db-*
         retention-days: 3

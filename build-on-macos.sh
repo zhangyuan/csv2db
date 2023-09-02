@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BINARY_NAME=${BINARY_NAME:-csv2sqlite3}
+BINARY_NAME=${BINARY_NAME:-csv2db}
 
 rm -rf bin/${BINARY_NAME}*
 

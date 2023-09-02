@@ -1,1 +1,1 @@
-# csv2sqlite3
+# csv2db
